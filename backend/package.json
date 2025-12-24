@@ -23,6 +23,8 @@
     "express": "^5.2.1",
     "langchain": "^1.2.2",
     "morgan": "^1.10.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0",
     "zod": "^4.2.1"
   },
   "prisma": {

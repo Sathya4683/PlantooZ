@@ -1,0 +1,194 @@
+openapi: 3.0.0
+
+info:
+  title: PlantooZ Backend API
+  description: Developer API reference for frontend and backend integrations
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /chat:
+    post:
+      summary: Generate nature-related chat response
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Successful chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          description: Validation error
+        "500":
+          description: AI service failure
+
+  /users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation error
+        "409":
+          description: Email already exists
+
+  /items:
+    get:
+      summary: Get all items
+      tags:
+        - Items
+      responses:
+        "200":
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+
+    post:
+      summary: Create a new item
+      tags:
+        - Items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemRequest"
+      responses:
+        "201":
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "400":
+          description: Validation error
+        "500":
+          description: Database error
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - prompt_text
+        - chat_type
+      properties:
+        prompt_text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          example: How can tree planting help cities?
+        chat_type:
+          type: string
+          enum:
+            - text
+
+    ChatResponse:
+      type: object
+      properties:
+        chat_type:
+          type: string
+          example: text
+        response:
+          type: string
+          example: Tree planting in cities improves air quality...
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          nullable: true
+          example: John
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: John
+
+    Item:
+      type: object
+      properties:
+        item_id:
+          type: integer
+          example: 1
+        item_name:
+          type: string
+          example: Hat
+        item_price:
+          type: string
+          description: Decimal value returned as string
+          example: "200"
+
+    CreateItemRequest:
+      type: object
+      required:
+        - item_name
+        - item_price
+      properties:
+        item_name:
+          type: string
+          minLength: 1
+          example: Hat
+        item_price:
+          oneOf:
+            - type: number
+            - type: string
+          example: 200
