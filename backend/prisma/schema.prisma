@@ -13,3 +13,10 @@ model Users {
   email     String   @unique
   name      String?
 }
+
+
+model Items {
+  item_id   Int    @id @default(autoincrement())
+  item_name String
+  item_price Decimal  @db.Decimal(10, 2)
+}
