@@ -10,6 +10,9 @@ servers:
     description: Local development server
 
 paths:
+  # -------------------------
+  # CHAT
+  # -------------------------
   /chat:
     post:
       summary: Generate nature-related chat response
@@ -32,6 +35,9 @@ paths:
         "500":
           description: AI service failure
 
+  # -------------------------
+  # USERS
+  # -------------------------
   /users:
     get:
       summary: Get all users
@@ -57,12 +63,15 @@ paths:
               $ref: "#/components/schemas/CreateUserRequest"
       responses:
         "201":
-          description: User created successfully
+          description: User created
         "400":
           description: Validation error
         "409":
           description: Email already exists
 
+  # -------------------------
+  # ITEMS
+  # -------------------------
   /items:
     get:
       summary: Get all items
@@ -70,6 +79,12 @@ paths:
       responses:
         "200":
           description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
 
     post:
       summary: Create a new item
@@ -82,12 +97,11 @@ paths:
               $ref: "#/components/schemas/CreateItemRequest"
       responses:
         "201":
-          description: Item created successfully
+          description: Item created
 
   # -------------------------
-  # POSTS (Community Feed)
+  # POSTS (COMMUNITY FEED)
   # -------------------------
-
   /posts:
     post:
       summary: Create a new post
@@ -105,13 +119,14 @@ paths:
           description: Validation error
 
     get:
-      summary: Get posts feed
+      summary: Get posts feed (newest first)
       tags: [Posts]
       parameters:
         - in: query
           name: cursor
           schema:
             type: integer
+          description: Cursor for pagination (post ID)
         - in: query
           name: limit
           schema:
@@ -119,7 +134,7 @@ paths:
             default: 10
       responses:
         "200":
-          description: Posts feed
+          description: List of posts
 
   /posts/{postId}/like:
     post:
@@ -150,7 +165,7 @@ paths:
 
   /posts/{postId}/comments:
     post:
-      summary: Add a comment
+      summary: Add a comment to a post
       tags: [Posts]
       parameters:
         - in: path
@@ -177,6 +192,15 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
       responses:
         "200":
           description: List of comments
@@ -197,6 +221,7 @@ paths:
 
 components:
   schemas:
+    # -------- CHAT --------
     ChatRequest:
       type: object
       required: [prompt_text, chat_type]
@@ -213,6 +238,7 @@ components:
         response:
           type: string
 
+    # -------- USERS --------
     User:
       type: object
       properties:
@@ -232,6 +258,7 @@ components:
         name:
           type: string
 
+    # -------- ITEMS --------
     Item:
       type: object
       properties:
@@ -251,22 +278,25 @@ components:
         item_price:
           type: number
 
+    # -------- POSTS --------
     CreatePostRequest:
       type: object
-      required: [content_text]
+      required: [contentText]
       properties:
-        content_text:
+        contentText:
           type: string
-        image_url:
+          maxLength: 500
+        imageUrl:
           type: string
           nullable: true
-        post_type:
+        postType:
           type: string
           example: TEXT
 
     CreateCommentRequest:
       type: object
-      required: [comment_text]
+      required: [commentText]
       properties:
-        comment_text:
+        commentText:
           type: string
+          maxLength: 300
