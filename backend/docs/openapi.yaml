@@ -13,8 +13,7 @@ paths:
   /chat:
     post:
       summary: Generate nature-related chat response
-      tags:
-        - Chat
+      tags: [Chat]
       requestBody:
         required: true
         content:
@@ -36,8 +35,7 @@ paths:
   /users:
     get:
       summary: Get all users
-      tags:
-        - Users
+      tags: [Users]
       responses:
         "200":
           description: List of users
@@ -50,8 +48,7 @@ paths:
 
     post:
       summary: Create a new user
-      tags:
-        - Users
+      tags: [Users]
       requestBody:
         required: true
         content:
@@ -61,10 +58,6 @@ paths:
       responses:
         "201":
           description: User created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
         "400":
           description: Validation error
         "409":
@@ -73,22 +66,14 @@ paths:
   /items:
     get:
       summary: Get all items
-      tags:
-        - Items
+      tags: [Items]
       responses:
         "200":
           description: List of items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Item"
 
     post:
       summary: Create a new item
-      tags:
-        - Items
+      tags: [Items]
       requestBody:
         required: true
         content:
@@ -98,97 +83,190 @@ paths:
       responses:
         "201":
           description: Item created successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Item"
+
+  # -------------------------
+  # POSTS (Community Feed)
+  # -------------------------
+
+  /posts:
+    post:
+      summary: Create a new post
+      tags: [Posts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequest"
+      responses:
+        "201":
+          description: Post created
         "400":
           description: Validation error
-        "500":
-          description: Database error
+
+    get:
+      summary: Get posts feed
+      tags: [Posts]
+      parameters:
+        - in: query
+          name: cursor
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Posts feed
+
+  /posts/{postId}/like:
+    post:
+      summary: Like a post
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Post liked
+
+    delete:
+      summary: Unlike a post
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Post unliked
+
+  /posts/{postId}/comments:
+    post:
+      summary: Add a comment
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "201":
+          description: Comment added
+
+    get:
+      summary: Get comments for a post
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of comments
+
+  /posts/{postId}:
+    delete:
+      summary: Delete a post
+      tags: [Posts]
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Post deleted
 
 components:
   schemas:
     ChatRequest:
       type: object
-      required:
-        - prompt_text
-        - chat_type
+      required: [prompt_text, chat_type]
       properties:
         prompt_text:
           type: string
-          minLength: 1
-          maxLength: 1000
-          example: How can tree planting help cities?
         chat_type:
           type: string
-          enum:
-            - text
+          enum: [text]
 
     ChatResponse:
       type: object
       properties:
-        chat_type:
-          type: string
-          example: text
         response:
           type: string
-          example: Tree planting in cities improves air quality...
 
     User:
       type: object
       properties:
         id:
           type: integer
-          example: 1
         email:
           type: string
-          format: email
-          example: user@example.com
         name:
           type: string
-          nullable: true
-          example: John
 
     CreateUserRequest:
       type: object
-      required:
-        - email
+      required: [email]
       properties:
         email:
           type: string
-          format: email
-          example: user@example.com
         name:
           type: string
-          example: John
 
     Item:
       type: object
       properties:
         item_id:
           type: integer
-          example: 1
         item_name:
           type: string
-          example: Hat
         item_price:
           type: string
-          description: Decimal value returned as string
-          example: "200"
 
     CreateItemRequest:
       type: object
-      required:
-        - item_name
-        - item_price
+      required: [item_name, item_price]
       properties:
         item_name:
           type: string
-          minLength: 1
-          example: Hat
         item_price:
-          oneOf:
-            - type: number
-            - type: string
-          example: 200
+          type: number
+
+    CreatePostRequest:
+      type: object
+      required: [content_text]
+      properties:
+        content_text:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        post_type:
+          type: string
+          example: TEXT
+
+    CreateCommentRequest:
+      type: object
+      required: [comment_text]
+      properties:
+        comment_text:
+          type: string
