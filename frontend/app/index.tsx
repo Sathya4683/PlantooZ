@@ -1,15 +1,25 @@
-import { Text, View } from "react-native";
+import { Login } from "@/components/Login";
+import { Screen } from "@/components/Screen";
+import { router } from "expo-router";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
+  const handleSuccess = () => {
+    router.replace("/(drawer)/(tabs)/home");
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
+    <Screen>
+      <View style={styles.center}>
+        <Login onSuccess={handleSuccess} />
+      </View>
+    </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+  },
+});
