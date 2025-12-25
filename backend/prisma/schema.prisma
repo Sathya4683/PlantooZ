@@ -8,15 +8,36 @@ datasource db {
 }
 
 model Users {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  email     String   @unique
-  name      String?
+  id             Int            @id @default(autoincrement())
+  email          String         @unique
+  name           String?
+  createdAt      DateTime       @default(now())
+
+  // Streak tracking
+  currentStreak  Int            @default(0)
+  longestStreak  Int            @default(0)
+  lastActivityAt DateTime?      // normalized to UTC midnight
+
+  activities     UserActivity[]
+
+  @@index([email])
 }
 
+model UserActivity {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime // MUST be normalized to UTC midnight (YYYY-MM-DD)
+  count     Int      @default(1)
+
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // One row per user per day (critical invariant)
+  @@unique([userId, date])
+  @@index([userId, date])
+}
 
 model Items {
-  item_id   Int    @id @default(autoincrement())
-  item_name String
-  item_price Decimal  @db.Decimal(10, 2)
+  item_id     Int      @id @default(autoincrement())
+  item_name   String
+  item_price  Decimal @db.Decimal(10, 2)
 }
