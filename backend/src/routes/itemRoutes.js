@@ -1,18 +1,19 @@
-const express = require("express");
-const {
-  fetchItems,
+import express from "express";
+import {
   addItem,
+  fetchItems,
   removeItem,
-} = require("../controllers/allController");
+} from "../controllers/allController.js";
 
 const router = express.Router();
 
-// GET /users -> fetch all users
+// GET /items -> fetch all items
 router.get("/", fetchItems);
+
+// POST /items -> create a new item
 router.post("/", addItem);
+
+// DELETE /items/:id -> remove an item
 router.delete("/:id", removeItem);
 
-// POST /users -> create a new user
-// router.post("/", addUser);
-
-module.exports = router;
+export default router;

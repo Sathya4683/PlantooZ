@@ -1,4 +1,4 @@
-const { z } = require("zod");
+import { z } from "zod";
 
 const createChatSchema = z.object({
   prompt_text: z
@@ -9,4 +9,4 @@ const createChatSchema = z.object({
   chat_type: z.enum(["text"]),
 });
 
-module.exports = { createChatSchema };
+export { createChatSchema };

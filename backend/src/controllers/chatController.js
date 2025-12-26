@@ -1,5 +1,5 @@
-const { createChatSchema } = require("../validators/chatValidator");
-const chatService = require("../services/chatService");
+import chatService from "../services/chatService.js";
+import { createChatSchema } from "../validators/chatValidator.js";
 
 const chatController = async (req, res) => {
   try {
@@ -32,4 +32,4 @@ const chatController = async (req, res) => {
   }
 };
 
-module.exports = { chatController };
+export { chatController };

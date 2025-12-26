@@ -1,5 +1,6 @@
-const prisma = require("../prismaClient");
+import prisma from "../prismaClient.js";
 
+// ITEMS
 async function getAllItems() {
   return prisma.items.findMany();
 }
@@ -14,20 +15,16 @@ async function deleteItem(item_id) {
   });
 }
 
+// USERS
 async function getAllUsers() {
-  return prisma.Users.findMany(); // note the model name 'Users'
+  return prisma.Users.findMany(); // model name is 'Users'
 }
 
 async function createUser(data) {
   return prisma.Users.create({ data });
 }
 
-module.exports = { getAllUsers, createUser };
-
-module.exports = {
-  getAllItems,
-  createItem,
-  deleteItem,
-  getAllUsers,
-  createUser,
+export {
+  createItem, createUser, deleteItem, getAllItems, getAllUsers
 };
+

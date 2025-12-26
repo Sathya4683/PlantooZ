@@ -1,8 +1,16 @@
-require("dotenv").config({
-  path: require("path").resolve(__dirname, "../../.env"),
-});
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
+// recreate __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// load .env explicitly
+dotenv.config({
+  path: path.resolve(__dirname, "../../.env"),
+});
 
 const SYSTEM_PROMPT = `
 You are an expert in nature, trees, forests, plants, and environmental conservation.
@@ -37,12 +45,7 @@ async function run(userPrompt) {
   return response.content;
 }
 
-module.exports = {
-  run, // 🔴 THIS WAS MISSING OR WRONG
+// ✅ default export (matches your controller import)
+export default {
+  run,
 };
-
-// test
-// (async () => {
-//   const answer = await run("what is photosynthesis?");
-//   console.log(answer);
-// })();

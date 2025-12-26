@@ -1,13 +1,13 @@
-const {
-  getAllItems,
+import {
   createItem,
-  deleteItem,
-  getAllUsers,
   createUser,
-} = require("../services/allService");
+  deleteItem,
+  getAllItems,
+  getAllUsers,
+} from "../services/allService.js";
 
-const { createUserSchema } = require("../validators/testValidator");
-const { createItemSchema } = require("../validators/itemValidator");
+import { createItemSchema } from "../validators/itemValidator.js";
+import { createUserSchema } from "../validators/testValidator.js";
 
 async function fetchItems(req, res) {
   try {
@@ -40,9 +40,7 @@ async function addItem(req, res) {
 const removeItem = async (req, res) => {
   try {
     const id = Number(req.params.id);
-
     const item = await deleteItem(id);
-
     res.json(item);
   } catch (err) {
     res.status(404).json({ message: "Item not found" });
@@ -63,7 +61,6 @@ async function addUser(req, res) {
   try {
     // Validate request body with Zod
     const validated = createUserSchema.parse(req.body);
-
     const user = await createUser(validated);
     res.status(201).json(user);
   } catch (err) {
@@ -74,6 +71,7 @@ async function addUser(req, res) {
   }
 }
 
-// module.exports = { fetchUsers, addUser };
+export {
+  addItem, addUser, fetchItems, fetchUsers, removeItem
+};
 
-module.exports = { fetchItems, addItem, removeItem, fetchUsers, addUser };
