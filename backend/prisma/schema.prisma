@@ -19,6 +19,9 @@ model Users {
   lastActivityAt DateTime?      // normalized to UTC midnight
 
   activities     UserActivity[]
+  posts    Posts[]
+  comments Comments[]
+  likes    PostLikes[]
 
   @@index([email])
 }
@@ -40,4 +43,41 @@ model Items {
   item_id     Int      @id @default(autoincrement())
   item_name   String
   item_price  Decimal @db.Decimal(10, 2)
+}
+
+
+model Posts {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  contentText String
+  imageUrl    String?
+  postType    String      @default("TEXT")
+  createdAt   DateTime    @default(now())
+  user        Users       @relation(fields: [userId], references: [id])
+  comments    Comments[]
+  likes       PostLikes[]
+
+  @@index([createdAt])
+}
+
+model Comments {
+  id          Int      @id @default(autoincrement())
+  postId      Int
+  userId      Int
+  commentText String
+  createdAt   DateTime @default(now())
+
+  post Posts @relation(fields: [postId], references: [id])
+  user Users @relation(fields: [userId], references: [id])
+}
+
+model PostLikes {
+  id     Int @id @default(autoincrement())
+  postId Int
+  userId Int
+
+  post Posts @relation(fields: [postId], references: [id])
+  user Users @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
 }
