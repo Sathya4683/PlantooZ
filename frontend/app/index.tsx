@@ -1,25 +1,13 @@
-import { Login } from "@/components/Login";
-import { Screen } from "@/components/Screen";
-import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { useAuth } from "@clerk/clerk-expo";
+import { Redirect } from "expo-router";
 
 export default function Index() {
-  const handleSuccess = () => {
-    router.replace("/(drawer)/(tabs)/home");
-  };
+  const { isSignedIn } = useAuth();
 
-  return (
-    <Screen>
-      <View style={styles.center}>
-        <Login onSuccess={handleSuccess} />
-      </View>
-    </Screen>
-  );
+  if (isSignedIn) {
+    return <Redirect href="/(drawer)/(tabs)/home" />;
+  }
+
+  // If not signed in → send them into the auth flow
+  return <Redirect href="/(auth)/sign-in" />;
 }
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-  },
-});
