@@ -1,206 +1,197 @@
-# PlantooZ Backend – Developer API Reference
+![PlantooZ Banner](assets/banner.png)
 
-This document is intended for **frontend developers** and **other backend developers** integrating with the PlantooZ backend.
+# PlantooZ
+### A Community-Driven Platform to Restore Green Cover in Tamil Nadu
 
-Base URL (local):
-```
+---
 
-[http://localhost:3000](http://localhost:3000)
+## Why PlantooZ?
 
+Tamil Nadu is facing increasing challenges due to **deforestation, rapid urbanization, and rising pollution levels**. Shrinking green spaces not only impact air quality but also affect biodiversity, climate resilience, and overall quality of life.
+
+**PlantooZ** was created to address this problem through technology and community participation.
+
+> The goal of PlantooZ is to promote and verify tree planting efforts across Tamil Nadu, making environmental action visible, measurable, and collaborative.
+
+---
+
+## Vision & Impact
+
+- Encourage large-scale tree planting initiatives
+- Create awareness about environmental responsibility
+- Enable verified, real-world contributions using maps and AI
+- Build a long-term, community-driven green ecosystem
+
+---
+
+## Platform Overview
+
+PlantooZ is a full-stack, mobile-first application that enables users to:
+- Plant and verify trees using image analysis
+- Mark and manage green territories on a map
+- Track personal and community contributions
+- Engage socially and stay motivated through reminders and rewards
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|------|------------|
+| Frontend | Expo (React Native) |
+| Backend | Node.js |
+| ORM | Prisma |
+| Database | PostgreSQL |
+| Authentication | Clerk |
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=expo&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"/>
+</p>
+
+---
+
+## Authentication (Clerk)
+
+Secure user authentication powered by Clerk.
+
+<table>
+  <tr>
+    <td><img src="assets/login.jpg" width="220"/></td>
+    <td><img src="assets/signin.jpg" width="220"/></td>
+    <td><img src="assets/signout.jpg" width="220"/></td>
+  </tr>
+</table>
+
+---
+
+## User Profile & Community
+
+Track individual impact and social engagement.
+
+<table>
+  <tr>
+    <td><img src="assets/profile.jpg" width="220"/></td>
+    <!-- <td><img src="assets/contributiongraph.jpg" width="220"/></td> -->
+    <td><img src="assets/friends.jpg" width="220"/></td>
+  </tr>
+</table>
+
+---
+
+## Map & Territory Management
+
+Verified planting through maps and AI-based image analysis.
+
+<table>
+  <tr>
+    <td><img src="assets/territorycreate.jpg" width="220"/></td>
+    <td><img src="assets/takephoto.jpg" width="220"/></td>
+    <td><img src="assets/analyze.jpg" width="220"/></td>
+    <td><img src="assets/result.jpg" width="220"/></td>
+  </tr>
+
+
+<tr>
+  <td>
+  <img src="assets/markterritory.jpg" width="220"/></tr>
+  </td>
+
+</table>
+---
+
+## Ask (AI Assistant)
+
+Get guidance and answers related to planting and sustainability.
+
+<table>
+  <tr>
+    <td><img src="assets/prompt.jpg" width="220"/></td>
+    <td><img src="assets/response.jpg" width="220"/></td>
+  </tr>
+</table>
+
+---
+
+## Home Feed
+
+Community-driven feed showcasing planting activities.
+
+<table>
+  <tr>
+    <td><img src="assets/posts.jpg" width="220"/></td>
+    <td><img src="assets/createpost.jpg" width="220"/></td>
+  </tr>
+</table>
+
+---
+
+## Shop
+
+Access sustainable items and rewards.
+
+<img src="assets/shop.jpg" width="220"/>
+
+---
+
+## Reminders & Help
+
+Stay consistent with planting efforts and access guidance.
+
+<table>
+  <tr>
+    <td><img src="assets/alarm.jpg" width="220"/></td>
+    <td><img src="assets/help.jpg" width="220"/></td>
+  </tr>
+</table>
+
+---
+
+## How to Run the Project
+
+### Prerequisites
+- Node.js (v16 or above)
+- PostgreSQL
+- Expo CLI
+- npm
+
+---
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm start
 ````
 
-All requests and responses use **JSON** unless stated otherwise.
+---
+
+### Frontend (Expo)
+
+```bash
+cd frontend
+npm install
+expo start
+```
+
+Run on an emulator or scan the QR code using Expo Go.
+
 
 ---
 
-## 1. Chat API
+### Team
 
-### POST `/chat`
-
-Generates a nature-related response based on user input.
-
-#### Request Body
-```json
-{
-  "prompt_text": "How can tree planting help cities?",
-  "chat_type": "text"
-}
-````
-
-#### Validation (Zod)
-
-* `prompt_text`
-
-  * required
-  * string
-  * minimum length: 1
-  * maximum length: 1000
-* `chat_type`
-
-  * required
-  * enum: `"text"` (image support planned)
-
-#### Success Response
-
-```json
-{
-  "chat_type": "text",
-  "response": "Tree planting in cities improves air quality..."
-}
-```
-
-#### Error Responses
-
-* `400 Bad Request` – validation failure
-* `500 Internal Server Error` – AI service failure
+- Sathya Narayanan
+- Pranav B
+- Srujan Iyengar
+- Raghunandhan
 
 ---
 
-## 2. Users API
+> “The best time to plant a tree was 20 years ago. The second best time is now.”
+> — Chinese Proverb
 
-### GET `/users`
 
-Fetch all users.
-
-#### Request
-
-No body required.
-
-#### Success Response
-
-```json
-[
-  {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John"
-  }
-]
-```
-
----
-
-### POST `/users`
-
-Create a new user.
-
-#### Request Body
-
-```json
-{
-  "email": "user@example.com",
-  "name": "John"
-}
-```
-
-#### Validation (Zod)
-
-* `email`
-
-  * required
-  * valid email format
-* `name`
-
-  * optional
-  * string
-
-#### Success Response
-
-```json
-{
-  "id": 1,
-  "email": "user@example.com",
-  "name": "John"
-}
-```
-
-#### Error Responses
-
-* `400 Bad Request` – validation failure
-* `409 Conflict` – email already exists
-
----
-
-## 3. Items API
-
-### GET `/items`
-
-Fetch all items.
-
-#### Request
-
-No body required.
-
-#### Success Response
-
-```json
-[
-  {
-    "item_id": 1,
-    "item_name": "Hat",
-    "item_price": "200"
-  }
-]
-```
-
-> Note: `item_price` is returned as a string because it is stored as a Decimal.
-
----
-
-### POST `/items`
-
-Create a new item.
-
-#### Request Body
-
-```json
-{
-  "item_name": "Hat",
-  "item_price": 200
-}
-```
-
-#### Validation (Zod)
-
-* `item_name`
-
-  * required
-  * string
-  * minimum length: 1
-* `item_price`
-
-  * required
-  * number (or numeric string)
-  * must be positive
-
-#### Success Response
-
-```json
-{
-  "item_id": 1,
-  "item_name": "Hat",
-  "item_price": "200"
-}
-```
-
-#### Error Responses
-
-* `400 Bad Request` – validation failure
-* `500 Internal Server Error` – database error
-
----
-
-## Notes
-
-* All POST requests **must include**:
-
-  ```
-  Content-Type: application/json
-  ```
-* Decimal values are returned as strings by Prisma.
-* Chat responses are restricted to **nature, trees, environment, and conservation topics** by design.
-
----
-
-```
-```
