@@ -1,14 +1,5 @@
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-  Image,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
 
 type Props = {
   post: {
@@ -17,66 +8,41 @@ type Props = {
     content: string;
     image?: any;
     likes: number;
-    comments: number;
+    liked: boolean;
+    comments: string[];
   };
+  onLike: () => void;
+  onComment: () => void;
+  onImagePress?: () => void;
 };
 
-export function PostCard({ post }: Props) {
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(post.likes);
-  const [imageOpen, setImageOpen] = useState(false);
-
-  const toggleLike = () => {
-    setLiked((prev) => !prev);
-    setLikes((prev) => (liked ? prev - 1 : prev + 1));
-  };
-
+export function PostCard({ post, onLike, onComment, onImagePress }: Props) {
   return (
     <View style={styles.card}>
-      {/* Author */}
       <Text style={styles.author}>{post.author}</Text>
 
-      {/* Content */}
       <Text style={styles.content}>{post.content}</Text>
 
-      {/* Image */}
       {post.image && (
-        <>
-          <TouchableOpacity onPress={() => setImageOpen(true)}>
-            <Image source={post.image} style={styles.image} />
-          </TouchableOpacity>
-
-          {/* Full screen image modal */}
-          <Modal visible={imageOpen} transparent animationType="fade">
-            <Pressable
-              style={styles.modalContainer}
-              onPress={() => setImageOpen(false)}
-            >
-              <Image source={post.image} style={styles.fullImage} />
-            </Pressable>
-          </Modal>
-        </>
+        <TouchableOpacity onPress={onImagePress}>
+          <Image source={post.image} style={styles.image} />
+        </TouchableOpacity>
       )}
 
-      {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.action} onPress={toggleLike}>
+        <TouchableOpacity style={styles.action} onPress={onLike}>
           <Ionicons
-            name={liked ? "heart" : "heart-outline"}
+            name={post.liked ? "heart" : "heart-outline"}
             size={20}
-            color={liked ? "#EF4444" : "#A7F3D0"}
+            color={post.liked ? "#EF4444" : "#A7F3D0"}
           />
-          <Text style={styles.count}>{likes}</Text>
+          <Text style={styles.count}>{post.likes}</Text>
         </TouchableOpacity>
 
-        <View style={styles.action}>
-          <Ionicons
-            name="chatbubble-outline"
-            size={18}
-            color="#A7F3D0"
-          />
-          <Text style={styles.count}>{post.comments}</Text>
-        </View>
+        <TouchableOpacity style={styles.action} onPress={onComment}>
+          <Ionicons name="chatbubble-outline" size={18} color="#A7F3D0" />
+          <Text style={styles.count}>{post.comments.length}</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -85,13 +51,13 @@ export function PostCard({ post }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#0F2F1C",
-    padding: 16,
     borderRadius: 14,
+    padding: 16,
     marginBottom: 16,
   },
   author: {
     color: "#A7F3D0",
-    fontWeight: "600",
+    fontWeight: "700",
     marginBottom: 6,
   },
   content: {
@@ -103,7 +69,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 220,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   footer: {
     flexDirection: "row",
@@ -116,16 +82,5 @@ const styles = StyleSheet.create({
   },
   count: {
     color: "#EAF7EE",
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fullImage: {
-    width: "100%",
-    height: "80%",
-    resizeMode: "contain",
   },
 });
