@@ -1,36 +1,8 @@
-// const streakService = require("../services/streakService");
-
-// const logActivity = async (req, res) => {
-//   try {
-//     const { userId } = req.body; 
-//     if (!userId) return res.status(400).json({ message: "userId required" });
-
-//     const result = await streakService.logActivity(userId);
-//     res.json(result);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Failed to log activity" });
-//   }
-// };
-
-// const getHeatmap = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const data = await streakService.getHeatmap(parseInt(userId));
-//     res.json(data);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Failed to fetch heatmap" });
-//   }
-// };
-
-// module.exports = { logActivity, getHeatmap };
-
-const streakService = require("../services/streakService");
+import { logActivity as logActivityService, getHeatmap as getHeatmapService } 
+  from "../services/streakService.js";
 
 /**
  * POST /streak/log
- * Body: { userId: number }
  */
 async function logActivity(req, res) {
   try {
@@ -42,8 +14,7 @@ async function logActivity(req, res) {
       });
     }
 
-    const result = await streakService.logActivity(userId);
-
+    const result = await logActivityService(userId);
     return res.status(200).json(result);
   } catch (error) {
     console.error("logActivity error:", error);
@@ -55,7 +26,6 @@ async function logActivity(req, res) {
 
 /**
  * GET /streak/:userId
- * Returns heatmap data: { "YYYY-MM-DD": count }
  */
 async function getHeatmap(req, res) {
   try {
@@ -67,8 +37,7 @@ async function getHeatmap(req, res) {
       });
     }
 
-    const heatmap = await streakService.getHeatmap(userId);
-
+    const heatmap = await getHeatmapService(userId);
     return res.status(200).json(heatmap);
   } catch (error) {
     console.error("getHeatmap error:", error);
@@ -78,7 +47,4 @@ async function getHeatmap(req, res) {
   }
 }
 
-module.exports = {
-  logActivity,
-  getHeatmap,
-};
+export { logActivity, getHeatmap };
