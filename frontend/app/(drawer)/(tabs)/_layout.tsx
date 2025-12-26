@@ -24,6 +24,23 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="maps"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="map-outline" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="ask"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbox" size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color }) => (
