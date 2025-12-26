@@ -1,13 +1,22 @@
 import { Screen } from "@/components/Screen";
 import { Ionicons } from "@expo/vector-icons";
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Location from 'expo-location';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Circle, Marker } from 'react-native-maps';
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as Location from "expo-location";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
 
 export default function PlantMapScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
   const [permission, requestPermission] = useCameraPermissions();
 
   const [isCameraVisible, setCameraVisible] = useState(false);
@@ -17,6 +26,7 @@ export default function PlantMapScreen() {
 
   const [pendingCoords, setPendingCoords] = useState<any>(null);
   const [bases, setBases] = useState<any[]>([]);
+
   const [plants, setPlants] = useState<any[]>([]);
 
   const cameraRef = useRef<any>(null);
@@ -24,16 +34,24 @@ export default function PlantMapScreen() {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      if (status !== "granted") return;
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc);
     })();
   }, []);
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const p = 0.017453292519943295;
     const c = Math.cos;
-    const a = 0.5 - c((lat2 - lat1) * p) / 2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    const a =
+      0.5 -
+      c((lat2 - lat1) * p) / 2 +
+      (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2;
     return 12742 * Math.asin(Math.sqrt(a)) * 1000;
   };
 
@@ -44,25 +62,40 @@ export default function PlantMapScreen() {
       return;
     }
 
-    const isOverlapping = bases.some(base => calculateDistance(base.latitude, base.longitude, location.coords.latitude, location.coords.longitude) <= base.radius);
+    const isOverlapping = bases.some(
+      (base) =>
+        calculateDistance(
+          base.latitude,
+          base.longitude,
+          location.coords.latitude,
+          location.coords.longitude
+        ) <= base.radius
+    );
 
     if (isOverlapping) {
       Alert.alert("Error", "You are already inside a base territory.");
       return;
     }
 
-    setBases([...bases, {
-      id: Date.now(),
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      radius: 5,
-      plantCount: 0
-    }]);
+    setBases([
+      ...bases,
+      {
+        id: Date.now(),
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        radius: 5,
+        plantCount: 0,
+      },
+    ]);
   };
 
   const handleLongPress = (e: any) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
-    const targetBase = bases.find(base => calculateDistance(base.latitude, base.longitude, latitude, longitude) <= (base.radius + 2));
+    const targetBase = bases.find(
+      (base) =>
+        calculateDistance(base.latitude, base.longitude, latitude, longitude) <=
+        base.radius + 2
+    );
 
     if (!targetBase) {
       Alert.alert("Denied", "You must plant inside a base circle.");
@@ -84,7 +117,7 @@ export default function PlantMapScreen() {
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.7,
-          base64: false
+          base64: false,
         });
 
         setCameraVisible(false);
@@ -97,43 +130,71 @@ export default function PlantMapScreen() {
 
           try {
             const formData = new FormData();
-            formData.append('image', {
+            formData.append("image", {
               uri: photo.uri,
-              name: 'plant_capture.jpg',
-              type: 'image/jpeg',
+              name: "plant_capture.jpg",
+              type: "image/jpeg",
             } as any);
 
-            const response = await fetch('http://YOUR_LOCAL_IP:3000/analyze', {
-              method: 'POST',
-              body: formData,
-            });
+            const response = await fetch(
+              "http://192.168.1.8:3000/api/analyze",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
 
             const data = await response.json();
-            const detectedName = data.suggestedName || "Unknown Plant";
+            console.log(data);
 
             setAnalyzing(false);
 
-            Alert.prompt("Verification Complete", `Identified: ${detectedName}. Save this plant?`, (finalName) => {
-              if (finalName && pendingCoords) {
-                setPlants([...plants, { id: Date.now(), name: finalName, ...pendingCoords }]);
-                setBases(bases.map(b => b.id === pendingCoords.baseId ? { ...b, plantCount: b.plantCount + 1 } : b));
-              }
+            if (data.result === "no") {
+              Alert.alert(
+                "Not a Plant ❌",
+                "The image does not appear to be a real plant."
+              );
               setPendingCoords(null);
-            }, 'plain-text', detectedName);
+              return;
+            }
 
+            // ✅ result === "yes"
+            if (pendingCoords) {
+              setPlants((prev) => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  latitude: pendingCoords.latitude,
+                  longitude: pendingCoords.longitude,
+                },
+              ]);
+
+              console.log("Niggggggaaaa", pendingCoords.latitude);
+              console.log("########", pendingCoords.longitude);
+
+              Alert.alert(
+                "Plant Verified 🌱",
+                `Plant detected: ${data.type || "unknown plant"}`
+              );
+            }
+
+            setPendingCoords(null);
           } catch (error) {
             setAnalyzing(false);
             Alert.alert(
               "Verification Failed",
               "Could not reach the analysis server.",
               [
-                { text: "Cancel", style: "cancel", onPress: () => setPendingCoords(null) },
-                { text: "Try Again", onPress: () => setCameraVisible(true) }
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                  onPress: () => setPendingCoords(null),
+                },
+                { text: "Try Again", onPress: () => setCameraVisible(true) },
               ]
             );
           }
         }, 1500);
-
       } catch (e) {
         setProcessingPhoto(false);
         Alert.alert("Camera Error", "Failed to take photo");
@@ -158,7 +219,11 @@ export default function PlantMapScreen() {
 
         {isProcessingPhoto && (
           <View style={styles.centerLoadingOverlay}>
-            <ActivityIndicator size="large" color="#A7F3D0" style={{ transform: [{ scale: 2 }] }} />
+            <ActivityIndicator
+              size="large"
+              color="#A7F3D0"
+              style={{ transform: [{ scale: 2 }] }}
+            />
             <Text style={styles.processingText}>Processing...</Text>
           </View>
         )}
@@ -169,7 +234,6 @@ export default function PlantMapScreen() {
   return (
     <Screen>
       <View style={styles.container}>
-
         {isUploadSuccess && (
           <View style={styles.overlay}>
             <Ionicons name="checkmark-circle" size={80} color="#4ADE80" />
@@ -198,7 +262,7 @@ export default function PlantMapScreen() {
             onLongPress={handleLongPress}
             showsUserLocation
           >
-            {bases.map(base => (
+            {bases.map((base) => (
               <Circle
                 key={base.id}
                 center={{ latitude: base.latitude, longitude: base.longitude }}
@@ -207,9 +271,16 @@ export default function PlantMapScreen() {
                 strokeColor="#2D5A27"
               />
             ))}
-            {plants.map(plant => (
-              <Marker key={plant.id} coordinate={{ latitude: plant.latitude, longitude: plant.longitude }}>
-                <Text style={{ fontSize: 30 }}>🌱</Text>
+            {plants.map((plant) => (
+              <Marker
+                key={plant.id}
+                coordinate={{
+                  latitude: plant.latitude,
+                  longitude: plant.longitude,
+                }}
+                pinColor="green"
+              >
+                <Text style={{ fontSize: 28 }}>🌱</Text>
               </Marker>
             ))}
           </MapView>
@@ -226,76 +297,76 @@ export default function PlantMapScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  map: { width: '100%', height: '100%' },
+  map: { width: "100%", height: "100%" },
 
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 20,
-    backgroundColor: '#A7F3D0',
+    backgroundColor: "#A7F3D0",
     padding: 15,
     borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
   },
-  fabText: { color: '#0F2F1C', fontWeight: 'bold', marginLeft: 8 },
+  fabText: { color: "#0F2F1C", fontWeight: "bold", marginLeft: 8 },
 
   cameraOverlay: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 150,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 20
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: 20,
   },
   captureBtn: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255,255,255,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 4,
-    borderColor: 'white'
+    borderColor: "white",
   },
 
   centerLoadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
   processingText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20
+    fontWeight: "bold",
+    marginTop: 20,
   },
 
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 47, 28, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 20
+    backgroundColor: "rgba(15, 47, 28, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 20,
   },
   overlayText: {
-    color: '#EAF7EE',
+    color: "#EAF7EE",
     fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20
+    fontWeight: "bold",
+    marginTop: 20,
   },
   overlaySubText: {
-    color: '#A7F3D0',
+    color: "#A7F3D0",
     fontSize: 14,
-    marginTop: 8
+    marginTop: 8,
   },
 });
