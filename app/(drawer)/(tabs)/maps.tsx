@@ -82,7 +82,10 @@ export default function PlantMapScreen() {
     if (cameraRef.current && !isProcessingPhoto) {
       setProcessingPhoto(true);
       try {
-        const photo = await cameraRef.current.takePictureAsync({ base64: true });
+        const photo = await cameraRef.current.takePictureAsync({ 
+          quality: 0.7,
+          base64: false 
+        });
         
         setCameraVisible(false);
         setProcessingPhoto(false);
@@ -93,10 +96,16 @@ export default function PlantMapScreen() {
           setAnalyzing(true);
 
           try {
-            const response = await fetch('http://YOUR_LOCAL_IP:3000/analyze-plant', {
+            const formData = new FormData();
+            formData.append('image', {
+              uri: photo.uri,
+              name: 'plant_capture.jpg',
+              type: 'image/jpeg',
+            } as any);
+
+            const response = await fetch('http://YOUR_LOCAL_IP:3000/analyze', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image: photo.base64 }),
+              body: formData,
             });
 
             const data = await response.json();
@@ -139,7 +148,7 @@ export default function PlantMapScreen() {
         
         <View style={styles.cameraOverlay}>
           <TouchableOpacity 
-            style={[styles.captureBtn, isProcessingPhoto && { opacity: 0 }]} // Hide button when processing
+            style={[styles.captureBtn, isProcessingPhoto && { opacity: 0 }]} 
             onPress={takePictureAndAnalyze}
             disabled={isProcessingPhoto}
           >
