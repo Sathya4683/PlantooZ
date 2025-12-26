@@ -7,23 +7,19 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔑 load .env from TWO directories back
+// load .env from two directories back
 dotenv.config({
   path: path.resolve(__dirname, "../../.env"),
 });
 
-// read API key
 const API_KEY = process.env.GOOGLE_API_KEY;
 
-// fail fast if missing
 if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not set in ../../.env");
 }
 
-// init Gemini client
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// optional debug (remove later)
 console.log("✅ GOOGLE_API_KEY loaded:", API_KEY.slice(0, 6) + "…");
 
 async function checkIfPlant(imageBuffer, mimeType) {
@@ -35,17 +31,20 @@ async function checkIfPlant(imageBuffer, mimeType) {
 You are an image classification system.
 
 Task:
-Determine whether the image contains a REAL PLANT (tree, shrub, grass, flower, crop, or sapling).
+1. Decide whether the image contains a REAL PLANT.
+2. If yes, identify the plant using a common name.
 
-Rules:
-- If the image clearly contains a real plant → respond ONLY with:
-  {"result":"yes"}
-- If the image does NOT contain a real plant or is unclear → respond ONLY with:
+Rules (STRICT):
+- If the image clearly contains a real plant, respond ONLY with:
+  {"result":"yes","type":"<plant name>"}
+- If the image does NOT contain a plant or is unclear, respond ONLY with:
   {"result":"no"}
+- "type" must be a short common name (max 3 words, lowercase)
+- Do NOT include scientific names
 - Do NOT include explanations
 - Do NOT include markdown
 - Do NOT include extra keys
-- Output must be valid JSON
+- Output must be valid JSON ONLY
 `;
 
   const result = await model.generateContent([
@@ -60,12 +59,34 @@ Rules:
 
   const text = result.response.text().trim();
 
-  // strict guard
-  if (text !== '{"result":"yes"}' && text !== '{"result":"no"}') {
-    throw new Error(`Invalid Gemini response: ${text}`);
+  // ---- STRICT VALIDATION GUARD ----
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(`Invalid JSON from Gemini: ${text}`);
   }
 
-  return JSON.parse(text);
+  if (
+    parsed.result === "no" &&
+    Object.keys(parsed).length === 1
+  ) {
+    return parsed;
+  }
+
+  if (
+    parsed.result === "yes" &&
+    typeof parsed.type === "string" &&
+    parsed.type.length > 0 &&
+    parsed.type.split(" ").length <= 3
+  ) {
+    return {
+      result: "yes",
+      type: parsed.type.toLowerCase(),
+    };
+  }
+
+  throw new Error(`Invalid Gemini response shape: ${text}`);
 }
 
 export { checkIfPlant };
