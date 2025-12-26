@@ -9,93 +9,38 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
-          headerTitle: "",
+          headerTitle: "PlantooZ",
           headerShadowVisible: false,
-
-          // 🌿 Header theme
-          headerStyle: {
-            backgroundColor: "#0F2F1C",
-          },
+          headerStyle: { backgroundColor: "#0F2F1C" },
           headerTintColor: "#EAF7EE",
-
-          // 🌿 Drawer theme
-          drawerStyle: {
-            backgroundColor: "#0F2F1C",
-          },
+          drawerStyle: { backgroundColor: "#0F2F1C" },
           drawerActiveTintColor: "#A7F3D0",
           drawerInactiveTintColor: "#D1FAE5",
-
-          // Top-right icons
           headerRight: () => (
             <TouchableOpacity
-              activeOpacity={1}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginRight: 16,
-              }}
+              style={{ flexDirection: "row", marginRight: 16 }}
             >
-              {/* ❓ Help */}
-              <TouchableOpacity
-                onPress={() => router.push("/help")}
-                style={{ marginRight: 16 }}
-              >
-                <Ionicons
-                  name="help-circle-outline"
-                  size={22}
-                  color="#A7F3D0"
-                />
+              <TouchableOpacity onPress={() => router.push("/help")} style={{ marginRight: 16 }}>
+                <Ionicons name="help-circle-outline" size={22} color="#A7F3D0" />
               </TouchableOpacity>
-
-              {/* 🛒 Shop */}
               <TouchableOpacity onPress={() => router.push("/shop")}>
-                <Ionicons
-                  name="cart-outline"
-                  size={22}
-                  color="#A7F3D0"
-                />
+                <Ionicons name="cart-outline" size={22} color="#A7F3D0" />
               </TouchableOpacity>
             </TouchableOpacity>
           ),
         }}
       >
-        {/* -------- Hidden routes -------- */}
-
         <Drawer.Screen
           name="(tabs)"
-          options={{
-            drawerItemStyle: { display: "none" },
-          }}
+          options={{ drawerLabel: "Home Garden" }}
         />
-
-        <Drawer.Screen
-          name="help"
-          options={{
-            drawerItemStyle: { display: "none" },
-          }}
-        />
-
-        <Drawer.Screen
-          name="index"
-          options={{
-            drawerItemStyle: { display: "none" },
-          }}
-        />
-        <Drawer.Screen
-          name="shop"
-          options={{
-            drawerItemStyle: { display: "none" },
-          }}
-        />
-
-        {/* -------- Visible route -------- */}
-
         <Drawer.Screen
           name="settings"
-          options={{
-            drawerLabel: "Settings",
-          }}
+          options={{ drawerLabel: "Settings" }}
         />
+        {/* Hidden from Drawer Menu but accessible via routes */}
+        <Drawer.Screen name="help" options={{ drawerItemStyle: { display: "none" } }} />
+        <Drawer.Screen name="shop" options={{ drawerItemStyle: { display: "none" } }} />
       </Drawer>
     </GestureHandlerRootView>
   );
