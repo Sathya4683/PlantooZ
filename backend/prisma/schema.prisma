@@ -22,6 +22,7 @@ model Users {
   posts    Posts[]
   comments Comments[]
   likes    PostLikes[]
+  plants         PlantCoordinates[]
 
   @@index([email])
 }
@@ -80,4 +81,18 @@ model PostLikes {
   user Users @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId])
+}
+
+model PlantCoordinates {
+  plant_id   Int      @id @default(autoincrement())
+
+  latitude   Float
+  longitude  Float
+
+  userId     Int
+  user       Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
 }
